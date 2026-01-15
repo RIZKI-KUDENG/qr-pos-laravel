@@ -11,9 +11,6 @@ class CategoryForm
     {
         return $schema
             ->components([
-                TextInput::make('tenant_id')
-                    ->required()
-                    ->numeric(),
                 TextInput::make('name')
                     ->required(),
             ]);

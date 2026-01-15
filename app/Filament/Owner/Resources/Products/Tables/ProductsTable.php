@@ -24,7 +24,7 @@ class ProductsTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('price')
-                    ->money()
+                    ->prefix('Rp.')
                     ->sortable(),
                 IconColumn::make('is_active')
                     ->boolean(),

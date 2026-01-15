@@ -46,13 +46,12 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() === 'admin') {
-            // Hanya user dengan role admin atau email tertentu yang bisa masuk admin
-            return $this->email === 'rizki@example.com'; // Sesuaikan logika Anda
+
+            return $this->role === 'super_admin'; 
         }
 
         if ($panel->getId() === 'owner') {
-            // User bisa masuk owner panel jika punya tenant_id
-            return $this->tenant_id !== null;
+            return $this->tenant_id !== null && in_array($this->role, ['admin', 'kasir']);
         }
 
         return false;

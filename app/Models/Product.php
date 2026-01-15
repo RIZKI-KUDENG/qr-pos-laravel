@@ -20,4 +20,10 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+    protected $fillable = [
+        'category_id',
+        'name',
+        'price',
+        'is_active',
+    ];
 }
