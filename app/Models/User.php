@@ -20,7 +20,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'tenant_id'
+        'tenant_id',
+        'role'
     ];
 
     public function tenant(){

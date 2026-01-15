@@ -30,4 +30,5 @@ class Tenant extends Model
     {
         return $this->hasMany(Order::class);
     }
+    protected $fillable = ['name', 'slug', 'status'];
 }
