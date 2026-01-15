@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->decimal('price', 10, 2); // Pakai decimal untuk uang
+            $table->decimal('price', 10, 2); 
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

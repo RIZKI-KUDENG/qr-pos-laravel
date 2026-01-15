@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
-            $table->string('method'); // cash, qris, ewallet
+            $table->string('method');
             $table->decimal('amount', 12, 2);
-            $table->string('status'); // paid, failed
+            $table->string('status'); 
             $table->timestamps();
         });
     }

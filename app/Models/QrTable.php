@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class QrTable extends Model
 {
-    public function tenant(){
+    public function tenant()
+    {
         return $this->belongsTo(Tenant::class);
     }
-   public function order(){
-       return $this->hasMany(Order::class);
-   }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

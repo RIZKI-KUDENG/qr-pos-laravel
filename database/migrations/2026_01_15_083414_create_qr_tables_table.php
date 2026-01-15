@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
             $table->string('table_number');
-            $table->string('qr_code_url')->nullable(); // URL hasil generate QR
+            $table->string('qr_code_url')->nullable(); 
             $table->timestamps();
         });
     }
