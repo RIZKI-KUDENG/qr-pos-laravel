@@ -1,5 +1,6 @@
-export default function menuApp() {
+export default function menuApp(config = {}) {
     return {
+        storeUrl: config.storeUrl || '',
         isProductModalOpen: false,
         isCartOpen: false,
         selectedProduct: null,
@@ -33,13 +34,13 @@ export default function menuApp() {
             return new Intl.NumberFormat('id-ID').format(val)
         },
 
-        async submitOrder(url) {
+         async submitOrder() {
             if (this.cart.length === 0) return
 
             this.loading = true
 
             try {
-                const res = await fetch(url, {
+                const res = await fetch(this.storeUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -48,17 +49,24 @@ export default function menuApp() {
                             .content
                     },
                     body: JSON.stringify({
-                        cart: this.cart 
+                        cart: this.cart,
+                        total_amount: this.$store.cart.total,
                     })
                 })
 
-                if (!res.ok) throw new Error()
+                const data = await res.json()
 
-                this.$store.cart.clear() 
+                if (!res.ok || data.status !== 'success') {
+                    throw new Error(data.message || 'Gagal')
+                }
+
+                this.$store.cart.clear()
                 this.isCartOpen = false
-                alert('Pesanan berhasil dibuat!')
-            } catch {
+                alert('Transaksi berhasil!')
+
+            } catch (e) {
                 alert('Gagal memproses pesanan')
+                console.error(e)
             } finally {
                 this.loading = false
             }

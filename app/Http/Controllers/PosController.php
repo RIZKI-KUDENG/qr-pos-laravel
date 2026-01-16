@@ -1,10 +1,12 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
@@ -33,11 +35,20 @@ class PosController extends Controller
     public function store(Request $request)
     {
         // Validasi input dari Alpine.js
-        $request->validate([
-            'cart' => 'required|array|min:1',
-            'cash_amount' => 'required|numeric',
-            'total_amount' => 'required|numeric',
-        ]);
+        $user = Auth::user();
+         $request->validate([
+        'cart' => 'required|array|min:1',
+        'cart.*.id' => [
+            'required', 
+            // Pastikan Product ID ada di database DAN milik Tenant user ini
+            Rule::exists('products', 'id')->where(function ($query) use ($user) {
+                return $query->where('tenant_id', $user->tenant_id);
+            }),
+        ],
+        'cart.*.qty' => 'required|integer|min:1',
+        'cart.*.price' => 'required|numeric|min:0', // Jangan percaya harga dari frontend 100%
+        'cash_amount' => 'required|numeric|min:0',
+    ]);
 
         $user = Auth::user();
         $tenant = $user->tenant;
@@ -84,6 +95,7 @@ class PosController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('POS Error: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }

@@ -169,9 +169,6 @@
                 <div class="flex justify-between text-gray-500 text-sm"> <span>Subtotal</span> <span
                         class="font-medium text-gray-700">Rp <span
                             x-text="formatRupiah($store.cart.total)"></span></span> </div>
-                <div class="flex justify-between text-gray-500 text-sm"> <span>Pajak (10%)</span> <span
-                        class="font-medium text-gray-700">Rp <span
-                            x-text="formatRupiah($store.cart.total * 0.1)"></span></span> </div>
                 <div class="border-t border-gray-200 pt-3 flex justify-between items-center mb-2"> <span
                         class="font-bold text-lg text-gray-800">Total</span> <span
                         class="font-bold text-2xl text-black">Rp <span
@@ -275,7 +272,7 @@
                 changeAmount: 0,
 
                 grandTotal() {
-                    return this.$store.cart.total * 1.1; 
+                    return this.$store.cart.total 
                 },
 
                 openPaymentModal() {
@@ -295,8 +292,9 @@
                     this.calculateChange();
                 },
 
-                processPayment() {
+                 processPayment() {
                     if (Number(this.cashAmount) >= this.grandTotal()) {
+                        
                         alert(`Transaksi Berhasil!\nTotal: Rp ${this.formatRupiah(this.grandTotal())}\nKembalian: Rp ${this.formatRupiah(this.changeAmount)}\n\n(Struk sedang dicetak...)`);
                         this.$store.cart.clear();
                         this.isModalOpen = false;
