@@ -37,9 +37,6 @@ class ProductsTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                ImageColumn::make('image')
-                    ->disk('public')
-                    ->square(),
             ])
             ->filters([
                 //
