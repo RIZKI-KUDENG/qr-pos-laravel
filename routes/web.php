@@ -23,6 +23,14 @@ Route::middleware('auth')->group(function () {
 Route::get('/menu/{tenant:slug}/{qrTable}', [MenuController::class, 'table'])->name('client.menu');
 Route::post('/menu/{tenant:slug}/{qrTable}/order', [MenuController::class, 'storeOrder'])->name('client.order.store');
 
-
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Tambahkan Route POS di sini
+    Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
+    Route::post('/pos/order', [PosController::class, 'store'])->name('pos.store'); // Route untuk submit order
+});
 
 require __DIR__.'/auth.php';
