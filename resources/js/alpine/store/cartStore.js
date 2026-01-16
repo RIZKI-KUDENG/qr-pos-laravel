@@ -3,9 +3,6 @@ document.addEventListener('alpine:init', () => {
         items: [],
 
         add(product) {
-            if(product){
-                console.log(product)
-            }
             const item = this.items.find(i => i.id === product.id)
             if (item) {
                 item.qty++

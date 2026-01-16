@@ -20,7 +20,7 @@
                         <div class="flex items-center gap-3">
                             <button @click="decrementItem(item.id)" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold">-</button>
                             <span x-text="item.qty" class="w-4 text-center"></span>
-                            <button @click="incrementItem(item.id)" class="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold">+</button>
+                            <button @click="incrementItem(item.id)" class="w-8 h-8 rounded-full bg-primary-600  flex items-center justify-center font-bold">+</button>
                         </div>
                     </div>
                 </template>

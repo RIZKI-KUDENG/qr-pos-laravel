@@ -4,15 +4,29 @@ export default function menuApp() {
         isCartOpen: false,
         selectedProduct: null,
         loading: false,
-
+        get cart() {
+            return this.$store.cart.items;
+        },
+        get cartTotal() {
+            return this.$store.cart.total;
+        },
+        get cartCount() {
+            return this.$store.cart.count;
+        },
         openProduct(product) {
             this.selectedProduct = product
             this.isProductModalOpen = true
         },
-
         closeAll() {
             this.isProductModalOpen = false
             this.isCartOpen = false
+        },
+
+        incrementItem(id) {
+            this.$store.cart.increment(id);
+        },
+        decrementItem(id) {
+            this.$store.cart.decrement(id);
         },
 
         formatRupiah(val) {
@@ -20,7 +34,7 @@ export default function menuApp() {
         },
 
         async submitOrder(url) {
-            if (Alpine.store('cart').items.length === 0) return
+            if (this.cart.length === 0) return
 
             this.loading = true
 
@@ -34,13 +48,13 @@ export default function menuApp() {
                             .content
                     },
                     body: JSON.stringify({
-                        cart: Alpine.store('cart').items
+                        cart: this.cart 
                     })
                 })
 
                 if (!res.ok) throw new Error()
 
-                Alpine.store('cart').clear()
+                this.$store.cart.clear() 
                 this.isCartOpen = false
                 alert('Pesanan berhasil dibuat!')
             } catch {
