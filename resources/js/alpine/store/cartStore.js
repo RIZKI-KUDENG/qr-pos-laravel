@@ -31,6 +31,9 @@ document.addEventListener('alpine:init', () => {
                 this.items.splice(index, 1)
             }
         },
+        removeItem(id) {
+            this.items = this.items.filter(i => i.id !== id);
+        },
 
         get total() {
             return this.items.reduce((t, i) => t + i.price * i.qty, 0)
