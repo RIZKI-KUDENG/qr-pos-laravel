@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->text('description');
+            $table->string('image');
             $table->decimal('price', 10, 2); 
             $table->boolean('is_active')->default(true);
             $table->timestamps();
@@ -28,5 +30,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('products');
+        Schema::table('products', function (Blueprint $table) {
+        $table->dropColumn(['image', 'description']);
+    });
     }
 };
