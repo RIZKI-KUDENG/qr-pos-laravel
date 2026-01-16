@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
 
 // Route::get('/{tenant:slug}/menu', [MenuController::class, 'index'])->name('client.menu');
 Route::get('/menu/{tenant:slug}/{qrTable}', [MenuController::class, 'table'])->name('client.menu');
+Route::post('/menu/{tenant:slug}/{qrTable}/order', [MenuController::class, 'storeOrder'])->name('client.order.store');
 
 
 
