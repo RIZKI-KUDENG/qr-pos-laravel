@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\MenuController;
+use App\Livewire\ProductManager;
+use App\Livewire\KitchenDisplay;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,6 +33,8 @@ Route::middleware('auth')->group(function () {
     // Tambahkan Route POS di sini
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::post('/pos/order', [PosController::class, 'store'])->name('pos.store'); // Route untuk submit order
+    Route::get('/products', ProductManager::class)->name('products.index');
+    Route::get('/kitchen', KitchenDisplay::class)->name('kitchen.index');
 });
 
 require __DIR__.'/auth.php';

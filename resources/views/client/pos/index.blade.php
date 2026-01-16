@@ -1,147 +1,195 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>POS System</title>
-    
-    {{-- Load Fonts & Scripts --}}
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Hide scrollbar for category list but allow scrolling */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
-<body class="bg-gray-100 h-screen" x-data="posPayment()">
 
-    <div class="flex h-full">
-        <main class="flex-1 h-full overflow-y-auto  relative">
-            <div class="p-6 pb-24"> <div class="flex justify-between items-center mb-6 sticky top-0 bg-gray-100 z-10 py-2">
+<body class="bg-gray-100 h-screen flex overflow-hidden" x-data="posPayment()">
+
+    <aside class="w-20 bg-black flex flex-col items-center py-6 text-white shrink-0 z-30">
+        <div class="mb-8 p-2 bg-white/10 rounded-lg">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+        </div>
+
+        <nav class="flex-1 flex flex-col gap-6 w-full px-2">
+            <a href="{{ route('pos.index') }}"
+                class="flex flex-col items-center gap-1 p-3 rounded-xl {{ request()->routeIs('pos.index') ? 'bg-white text-black' : 'text-gray-400 hover:text-white hover:bg-gray-800' }} transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span class="text-[10px] font-bold">Kasir</span>
+            </a>
+
+            <a href="{{ route('kitchen.index') }}"
+                class="flex flex-col items-center gap-1 p-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                <span class="text-[10px] font-bold">Dapur</span>
+            </a>
+
+            <a href="{{ route('products.index') }}"
+                class="flex flex-col items-center gap-1 p-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                <span class="text-[10px] font-bold">Produk</span>
+            </a>
+        </nav>
+
+        <form method="POST" action="{{ route('logout') }}" class="w-full px-2 mb-4">
+            @csrf
+            <button type="submit"
+                class="w-full flex flex-col items-center gap-1 p-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span class="text-[10px] font-bold">Keluar</span>
+            </button>
+        </form>
+    </aside>
+
+    <div class="flex-1 flex h-full">
+        <main class="flex-1 h-full overflow-y-auto relative bg-gray-100">
+            <div class="p-6 pb-24">
+                <div
+                    class="flex justify-between items-center mb-6 sticky top-0 bg-gray-100/95 backdrop-blur z-10 py-4 border-b border-gray-200">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Menu Order</h1>
-                        <p class="text-gray-500 text-sm">Pilih menu berdasarkan kategori</p>
+                        <p class="text-gray-500 text-sm">{{ now()->format('l, d F Y') }}</p>
                     </div>
-                    
+
                     <div class="relative w-72">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </span>
-                        <input type="text" placeholder="Cari menu..." 
-                            class="pl-10 w-full rounded-xl border-gray-200 focus:border-black focus:ring-black transition-colors"
-                        >
+                        <input type="text" placeholder="Cari menu..."
+                            class="pl-10 w-full rounded-xl border-gray-200 focus:border-black focus:ring-black transition-colors">
                     </div>
                 </div>
 
                 <div class="space-y-10">
                     @forelse($categories as $category)
-                        @if($category->products->count() > 0)
+                        @if ($category->products->count() > 0)
                             <div id="category-{{ $category->id }}">
                                 <div class="flex items-center gap-2 mb-4">
                                     <div class="w-1 h-6 bg-black rounded-full"></div>
                                     <h2 class="text-xl font-bold text-gray-800">{{ $category->name }}</h2>
-                                    <span class="text-xs font-medium text-gray-400 bg-gray-200 px-2 py-0.5 rounded-full">
-                                        {{ $category->products->count() }}
-                                    </span>
                                 </div>
-
-                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-                                    @foreach($category->products as $product)
-                                        @include('client.pos.partials.product-card-pos', ['product' => $product])
+                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    @foreach ($category->products as $product)
+                                        @include('client.pos.partials.product-card-pos', [
+                                            'product' => $product,
+                                        ])
                                     @endforeach
                                 </div>
                             </div>
                         @endif
                     @empty
                         <div class="text-center py-20">
-                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-200 mb-4">
-                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                            </div>
-                            <p class="text-gray-500 font-medium">Belum ada kategori atau produk.</p>
+                            <p class="text-gray-500 font-medium">Belum ada kategori atau produk aktif.</p>
                         </div>
                     @endforelse
                 </div>
-
             </div>
         </main>
 
-        <aside class="w-[400px] bg-white border-l border-gray-200 h-full flex flex-col shadow-2xl sticky z-20 shrink-0">
+        <aside class="w-[380px] bg-white border-l border-gray-200 h-full flex flex-col shadow-2xl sticky z-20 shrink-0">
             <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-white">
-                <h2 class="font-bold text-lg text-gray-800">Current Order</h2>
-                <button @click="$store.cart.clear()" class="text-red-500 text-sm hover:underline font-medium" x-show="$store.cart.items.length > 0">
-                    Clear All
-                </button>
+                <h2 class="font-bold text-lg text-gray-800">Current Order</h2> <button @click="$store.cart.clear()"
+                    class="text-red-500 text-sm hover:underline font-medium" x-show="$store.cart.items.length > 0">
+                    Clear All </button>
             </div>
-
-            <div class="flex-1 overflow-y-auto p-4 space-y-4">
-                <template x-if="$store.cart.items.length === 0">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4"> <template x-if="$store.cart.items.length === 0">
                     <div class="h-full flex flex-col items-center justify-center text-gray-400 space-y-4 opacity-60">
-                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
                         <p class="font-medium">Belum ada item</p>
                     </div>
-                </template>
-
-                <template x-for="item in $store.cart.items" :key="item.id">
-                    <div class="flex items-start gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 animate-fade-in-up">
+                </template> <template x-for="item in $store.cart.items" :key="item.id">
+                    <div
+                        class="flex items-start gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 animate-fade-in-up">
                         <div class="flex-1">
                             <h4 class="text-sm font-semibold text-gray-800 line-clamp-2" x-text="item.name"></h4>
-                            <p class="text-xs text-gray-500 font-medium">
-                                Rp <span x-text="formatRupiah(item.price)"></span>
-                            </p>
+                            <p class="text-xs text-gray-500 font-medium"> Rp <span
+                                    x-text="formatRupiah(item.price)"></span> </p>
                         </div>
-
                         <div class="flex flex-col items-end gap-1">
-                            <div class="flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
-                                <button @click="$store.cart.decrement(item.id)" class="w-6 h-6 flex items-center justify-center bg-gray-100 rounded hover:bg-gray-200 transition-colors text-gray-600 font-bold">-</button>
-                                <span class="text-sm font-bold w-4 text-center" x-text="item.qty"></span>
-                                <button @click="$store.cart.increment(item.id)" class="w-6 h-6 flex items-center justify-center bg-black text-white rounded hover:bg-gray-800 transition-colors font-bold">+</button>
+                            <div
+                                class="flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
+                                <button @click="$store.cart.decrement(item.id)"
+                                    class="w-6 h-6 flex items-center justify-center bg-gray-100 rounded hover:bg-gray-200 transition-colors text-gray-600 font-bold">-</button>
+                                <span class="text-sm font-bold w-4 text-center" x-text="item.qty"></span> <button
+                                    @click="$store.cart.increment(item.id)"
+                                    class="w-6 h-6 flex items-center justify-center bg-black text-white rounded hover:bg-gray-800 transition-colors font-bold">+</button>
                             </div>
-                            <p class="text-sm font-bold text-gray-800">
-                                Rp <span x-text="formatRupiah(item.price * item.qty)"></span>
-                            </p>
+                            <p class="text-sm font-bold text-gray-800"> Rp <span
+                                    x-text="formatRupiah(item.price * item.qty)"></span> </p>
                         </div>
                     </div>
-                </template>
-            </div>
-
+                </template> </div>
             <div class="p-5 bg-gray-50 border-t border-gray-200 space-y-3">
-                <div class="flex justify-between text-gray-500 text-sm">
-                    <span>Subtotal</span>
-                    <span class="font-medium text-gray-700">Rp <span x-text="formatRupiah($store.cart.total)"></span></span>
-                </div>
-                <div class="flex justify-between text-gray-500 text-sm">
-                    <span>Pajak (10%)</span>
-                    <span class="font-medium text-gray-700">Rp <span x-text="formatRupiah($store.cart.total * 0.1)"></span></span>
-                </div>
-                
-                <div class="border-t border-gray-200 pt-3 flex justify-between items-center mb-2">
-                    <span class="font-bold text-lg text-gray-800">Total</span>
-                    <span class="font-bold text-2xl text-black">Rp <span x-text="formatRupiah(grandTotal())"></span></span>
-                </div>
-
-                <button 
-                    @click="openPaymentModal()"
-                    :disabled="$store.cart.items.length === 0"
-                    :class="$store.cart.items.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-white hover:bg-gray-800 hover:shadow-lg'"
-                    class="w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 transform active:scale-95"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    <span>Bayar Sekarang</span>
-                </button>
+                <div class="flex justify-between text-gray-500 text-sm"> <span>Subtotal</span> <span
+                        class="font-medium text-gray-700">Rp <span
+                            x-text="formatRupiah($store.cart.total)"></span></span> </div>
+                <div class="flex justify-between text-gray-500 text-sm"> <span>Pajak (10%)</span> <span
+                        class="font-medium text-gray-700">Rp <span
+                            x-text="formatRupiah($store.cart.total * 0.1)"></span></span> </div>
+                <div class="border-t border-gray-200 pt-3 flex justify-between items-center mb-2"> <span
+                        class="font-bold text-lg text-gray-800">Total</span> <span
+                        class="font-bold text-2xl text-black">Rp <span
+                            x-text="formatRupiah(grandTotal())"></span></span> </div> <button
+                    @click="openPaymentModal()" :disabled="$store.cart.items.length === 0"
+                    :class="$store.cart.items.length === 0 ? 'bg-gray-300 cursor-not-allowed' :
+                        'bg-white hover:bg-gray-800 hover:shadow-lg'"
+                    class="w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 transform active:scale-95">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg> <span>Bayar Sekarang</span> </button>
             </div>
         </aside>
     </div>
 
-    <div 
+     <div 
         x-show="isModalOpen" 
         style="display: none;"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
@@ -219,7 +267,7 @@
         </div>
     </div>
 
-    <script>
+      <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('posPayment', () => ({
                 isModalOpen: false,
@@ -262,4 +310,5 @@
         });
     </script>
 </body>
+
 </html>
