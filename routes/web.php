@@ -24,7 +24,10 @@ Route::middleware('auth')->group(function () {
 
 // Route::get('/{tenant:slug}/menu', [MenuController::class, 'index'])->name('client.menu');
 Route::get('/menu/{tenant:slug}/{qrTable}', [MenuController::class, 'table'])->name('client.menu');
-Route::post('/menu/{tenant:slug}/{qrTable}/order', [MenuController::class, 'storeOrder'])->name('client.order.store');
+Route::post('/menu/{tenant:slug}/{qrTable}/order', [MenuController::class, 'store'])->name('client.order.store');
+
+Route::get('/order/{tenant:slug}/{orderNumber}', [MenuController::class, 'showStatus'])->name('client.order.status');
+Route::post('/order/{tenant:slug}/{orderNumber}/cancel', [MenuController::class, 'cancelOrder'])->name('client.order.cancel');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

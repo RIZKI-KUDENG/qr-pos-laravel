@@ -28,7 +28,8 @@ class Order extends Model
     protected $fillable = [
         'tenant_id',
         'qr_table_id',
+        'customer_name',
         'status',
-        'total_amount',
+        'total',
     ];
 }

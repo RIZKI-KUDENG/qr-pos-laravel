@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\Order;
+use App\Models\Tenant;
 use App\Models\Payment;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
@@ -21,8 +22,6 @@ class PosController extends Controller
         if(!$tenant){
             abort(403, 'You are not authorized to access this page.');
         }
-
-        // PERBAIKAN: Hapus ->get() yang pertama
         $categories = $tenant->categories()
             ->with(['products' => function ($query){
                 $query->where('is_active', true);
@@ -34,20 +33,19 @@ class PosController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi input dari Alpine.js
         $user = Auth::user();
          $request->validate([
         'cart' => 'required|array|min:1',
         'cart.*.id' => [
             'required', 
-            // Pastikan Product ID ada di database DAN milik Tenant user ini
             Rule::exists('products', 'id')->where(function ($query) use ($user) {
                 return $query->where('tenant_id', $user->tenant_id);
             }),
         ],
         'cart.*.qty' => 'required|integer|min:1',
-        'cart.*.price' => 'required|numeric|min:0', // Jangan percaya harga dari frontend 100%
+        'cart.*.price' => 'required|numeric|min:0', 
         'cash_amount' => 'required|numeric|min:0',
+        'customer_name' => 'required|string|max:50',
     ]);
 
         $user = Auth::user();
@@ -59,13 +57,11 @@ class PosController extends Controller
             // 1. Buat Order
             $order = new Order();
             $order->tenant_id = $tenant->id;
-            $order->status = 'pending'; // Status awal, nanti Dapur ubah jadi 'completed'
-            // $order->qr_table_id = ... (Opsional jika POS dianggap meja kasir/takeaway)
+            $order->status = $request->status ?? 'pending'; 
             $order->order_number = 'ORD-' . strtoupper(uniqid());
+            $order->customer_name = $request->customer_name;
             $order->total = $request->total_amount;
             $order->save();
-
-            // 2. Simpan Item Order
             foreach ($request->cart as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -75,8 +71,6 @@ class PosController extends Controller
                     'subtotal' => $item['price'] * $item['qty'],
                 ]);
             }
-
-            // 3. Simpan Pembayaran
             Payment::create([
                 'order_id' => $order->id,
                 'method' => 'cash',
@@ -89,16 +83,43 @@ class PosController extends Controller
             DB::commit();
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Transaksi berhasil disimpan!',
-                'order_id' => $order->id
-            ]);
+                'message' => 'Order created successfully',
+                'redirect_url' => route('client.order.status', [
+                    'tenant' => $tenant->slug, 
+                    'orderNumber' => $order->order_number
+                ])
+            ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('POS Error: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
+    }
+
+    
+    public function showStatus(Tenant $tenant, $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)
+                      ->where('tenant_id', $tenant->id)
+                      ->with('orderItems.product')
+                      ->firstOrFail();
+
+        return view('client.menu.order-status', compact('tenant', 'order'));
+    }
+
+    public function cancelOrder(Tenant $tenant, $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)
+                      ->where('tenant_id', $tenant->id)
+                      ->firstOrFail();
+
+        if ($order->status === 'pending') {
+            $order->update(['status' => 'cancelled']);
+            return back()->with('success', 'Pesanan berhasil dibatalkan.');
+        }
+
+        return back()->with('error', 'Pesanan tidak dapat dibatalkan karena sudah diproses.');
     }
 
 }

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
             $table->foreignId('qr_table_id')->nullable()->constrained('qr_tables')->nullOnDelete();
             $table->string('order_number')->unique();
+            $table->string('customer_name');
             $table->enum('status', ['pending', 'paid','completed','cancelled'])->default('pending');
             $table->decimal('total', 12, 2)->default(0);
             $table->timestamps();

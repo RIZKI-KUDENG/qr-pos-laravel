@@ -5,6 +5,7 @@ export default function menuApp(config = {}) {
         isCartOpen: false,
         selectedProduct: null,
         loading: false,
+        customerName: '',
         get cart() {
             return this.$store.cart.items;
         },
@@ -34,42 +35,40 @@ export default function menuApp(config = {}) {
             return new Intl.NumberFormat('id-ID').format(val)
         },
 
-         async submitOrder() {
-            if (this.cart.length === 0) return
+        submitOrder() {
+    if (!this.customerName || this.customerName.trim() === '') {
+        alert('Mohon isi Nama Pemesan terlebih dahulu agar kasir tidak bingung.');
+        return;
+    }
 
-            this.loading = true
+    this.loading = true;
 
-            try {
-                const res = await fetch(this.storeUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document
-                            .querySelector('meta[name="csrf-token"]')
-                            .content
-                    },
-                    body: JSON.stringify({
-                        cart: this.cart,
-                        total_amount: this.$store.cart.total,
-                    })
-                })
-
-                const data = await res.json()
-
-                if (!res.ok || data.status !== 'success') {
-                    throw new Error(data.message || 'Gagal')
-                }
-
-                this.$store.cart.clear()
-                this.isCartOpen = false
-                alert('Transaksi berhasil!')
-
-            } catch (e) {
-                alert('Gagal memproses pesanan')
-                console.error(e)
-            } finally {
-                this.loading = false
-            }
+    fetch(`/menu/${this.tenantSlug}/${this.qrTableId}/order`, { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            cart: this.cart,
+            customer_name: this.customerName 
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.redirect_url) {
+            this.$store.cart.clear(); 
+            window.location.href = data.redirect_url;
+        } else {
+            alert('Gagal: ' + (data.message || 'Error tidak diketahui'));
+            this.loading = false;
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan sistem.');
+        this.loading = false;
+    });
+}
     }
 }
