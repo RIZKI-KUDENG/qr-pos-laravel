@@ -25,4 +25,10 @@ class Order extends Model
     {
         return $this->hasOne(Payment::class);
     }
+    protected $fillable = [
+        'tenant_id',
+        'qr_table_id',
+        'status',
+        'total_amount',
+    ];
 }

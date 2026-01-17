@@ -37,35 +37,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
         </div>
-
-        <nav class="flex-1 flex flex-col gap-6 w-full px-2">
-            <a href="{{ route('pos.index') }}"
-                class="flex flex-col items-center gap-1 p-3 rounded-xl {{ request()->routeIs('pos.index') ? 'bg-white text-black' : 'text-gray-400 hover:text-white hover:bg-gray-800' }} transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                <span class="text-[10px] font-bold">Kasir</span>
-            </a>
-
-            <a href="{{ route('kitchen.index') }}"
-                class="flex flex-col items-center gap-1 p-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                </svg>
-                <span class="text-[10px] font-bold">Dapur</span>
-            </a>
-
-            <a href="{{ route('products.index') }}"
-                class="flex flex-col items-center gap-1 p-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-                <span class="text-[10px] font-bold">Produk</span>
-            </a>
-        </nav>
+        @include('client.pos.partials.nav-links')
 
         <form method="POST" action="{{ route('logout') }}" class="w-full px-2 mb-4">
             @csrf
@@ -128,143 +100,11 @@
             </div>
         </main>
 
-        <aside class="w-[380px] bg-white border-l border-gray-200 h-full flex flex-col shadow-2xl sticky z-20 shrink-0">
-            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-white">
-                <h2 class="font-bold text-lg text-gray-800">Current Order</h2> <button @click="$store.cart.clear()"
-                    class="text-red-500 text-sm hover:underline font-medium" x-show="$store.cart.items.length > 0">
-                    Clear All </button>
-            </div>
-            <div class="flex-1 overflow-y-auto p-4 space-y-4"> <template x-if="$store.cart.items.length === 0">
-                    <div class="h-full flex flex-col items-center justify-center text-gray-400 space-y-4 opacity-60">
-                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                            </path>
-                        </svg>
-                        <p class="font-medium">Belum ada item</p>
-                    </div>
-                </template> <template x-for="item in $store.cart.items" :key="item.id">
-                    <div
-                        class="flex items-start gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 animate-fade-in-up">
-                        <div class="flex-1">
-                            <h4 class="text-sm font-semibold text-gray-800 line-clamp-2" x-text="item.name"></h4>
-                            <p class="text-xs text-gray-500 font-medium"> Rp <span
-                                    x-text="formatRupiah(item.price)"></span> </p>
-                        </div>
-                        <div class="flex flex-col items-end gap-1">
-                            <div
-                                class="flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
-                                <button @click="$store.cart.decrement(item.id)"
-                                    class="w-6 h-6 flex items-center justify-center bg-gray-100 rounded hover:bg-gray-200 transition-colors text-gray-600 font-bold">-</button>
-                                <span class="text-sm font-bold w-4 text-center" x-text="item.qty"></span> <button
-                                    @click="$store.cart.increment(item.id)"
-                                    class="w-6 h-6 flex items-center justify-center bg-black text-white rounded hover:bg-gray-800 transition-colors font-bold">+</button>
-                            </div>
-                            <p class="text-sm font-bold text-gray-800"> Rp <span
-                                    x-text="formatRupiah(item.price * item.qty)"></span> </p>
-                        </div>
-                    </div>
-                </template> </div>
-            <div class="p-5 bg-gray-50 border-t border-gray-200 space-y-3">
-                <div class="flex justify-between text-gray-500 text-sm"> <span>Subtotal</span> <span
-                        class="font-medium text-gray-700">Rp <span
-                            x-text="formatRupiah($store.cart.total)"></span></span> </div>
-                <div class="border-t border-gray-200 pt-3 flex justify-between items-center mb-2"> <span
-                        class="font-bold text-lg text-gray-800">Total</span> <span
-                        class="font-bold text-2xl text-black">Rp <span
-                            x-text="formatRupiah(grandTotal())"></span></span> </div> <button
-                    @click="openPaymentModal()" :disabled="$store.cart.items.length === 0"
-                    :class="$store.cart.items.length === 0 ? 'bg-gray-300 cursor-not-allowed' :
-                        'bg-white hover:bg-gray-800 hover:shadow-lg'"
-                    class="w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 transform active:scale-95">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
-                        </path>
-                    </svg> <span>Bayar Sekarang</span> </button>
-            </div>
-        </aside>
+        @include('client.pos.partials.aside')
     </div>
+    @include('client.pos.partials.modal')
 
-     <div 
-        x-show="isModalOpen" 
-        style="display: none;"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-    >
-        <div 
-            class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-100"
-            @click.away="isModalOpen = false"
-        >
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-gray-800">Pembayaran</h3>
-                <button @click="isModalOpen = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-
-            <div class="p-6 space-y-6">
-                <div class="text-center space-y-1">
-                    <p class="text-gray-500 text-sm">Total Tagihan</p>
-                    <h2 class="text-4xl font-extrabold text-black">Rp <span x-text="formatRupiah(grandTotal())"></span></h2>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-700">Uang Tunai Diterima</label>
-                    <div class="relative group">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500 font-bold group-focus-within:text-black">Rp</span>
-                        <input 
-                            type="number" 
-                            id="cashInput"
-                            x-model="cashAmount"
-                            @input="calculateChange()"
-                            @keydown.enter="processPayment()"
-                            class="w-full pl-12 pr-4 py-3 rounded-xl border-gray-200 focus:border-black focus:ring-black font-bold text-lg transition-shadow"
-                            placeholder="0"
-                        >
-                    </div>
-                    
-                    <div class="flex gap-2 mt-2 overflow-x-auto no-scrollbar pb-1">
-                        <button @click="setCash(grandTotal())" class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">Uang Pas</button>
-                        <button @click="setCash(50000)" class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">50.000</button>
-                        <button @click="setCash(100000)" class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">100.000</button>
-                    </div>
-                </div>
-
-                <div class="bg-gray-50 rounded-xl p-4 border border-dashed border-gray-300">
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium text-gray-600">Kembalian</span>
-                        <span 
-                            class="font-bold text-2xl" 
-                            :class="changeAmount >= 0 ? 'text-green-600' : 'text-red-500'"
-                        >
-                            Rp <span x-text="formatRupiah(changeAmount < 0 ? 0 : changeAmount)"></span>
-                        </span>
-                    </div>
-                    <p x-show="changeAmount < 0" class="text-xs text-red-500 text-right mt-1 font-medium">Uang masih kurang!</p>
-                </div>
-            </div>
-
-            <div class="p-6 bg-gray-50 border-t border-gray-100">
-                <button 
-                    @click="processPayment()"
-                    :disabled="cashAmount < grandTotal()"
-                    :class="cashAmount < grandTotal() ? 'bg-gray-300 cursor-not-allowed' : 'bg-black hover:bg-gray-800 shadow-lg hover:shadow-xl'"
-                    class="w-full text-white py-3.5 rounded-xl font-bold text-lg transition-all flex justify-center items-center gap-2"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    <span>Cetak Struk & Selesai</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-      <script>
+    <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('posPayment', () => ({
                 isModalOpen: false,
@@ -272,7 +112,7 @@
                 changeAmount: 0,
 
                 grandTotal() {
-                    return this.$store.cart.total 
+                    return this.$store.cart.total
                 },
 
                 openPaymentModal() {
@@ -292,12 +132,44 @@
                     this.calculateChange();
                 },
 
-                 processPayment() {
+                processPayment() {
                     if (Number(this.cashAmount) >= this.grandTotal()) {
-                        
-                        alert(`Transaksi Berhasil!\nTotal: Rp ${this.formatRupiah(this.grandTotal())}\nKembalian: Rp ${this.formatRupiah(this.changeAmount)}\n\n(Struk sedang dicetak...)`);
-                        this.$store.cart.clear();
-                        this.isModalOpen = false;
+
+
+                        fetch('/pos/order', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify({
+                                    cart: this.$store.cart.items,
+                                    cash_amount: this.cashAmount,
+                                    total_amount: this
+                                        .grandTotal(),
+                                        status: 'paid'
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    alert(
+                                        `Transaksi Berhasil!\nTotal: Rp ${this.formatRupiah(this.grandTotal())}\nKembalian: Rp ${this.formatRupiah(this.changeAmount)}`
+                                        );
+                                    this.$store.cart.clear();
+                                    this.isModalOpen = false;
+
+                                    // Opsional: Redirect ke halaman cetak struk atau refresh
+                                    // window.location.reload(); 
+                                } else {
+                                    alert('Gagal menyimpan transaksi: ' + data.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Terjadi kesalahan sistem.');
+                            });
                     }
                 },
 

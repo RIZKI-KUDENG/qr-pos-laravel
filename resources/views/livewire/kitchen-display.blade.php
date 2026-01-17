@@ -17,14 +17,14 @@
                             <span class="text-xs font-bold text-gray-400">ORDER #{{ $order->id }}</span>
                             <div class="font-bold text-lg">{{ $order->created_at->format('H:i') }}</div>
                         </div>
-                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">PENDING</span>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">{{ strtoupper($order->status) }}</span>
                     </div>
                     
                     <div class="p-4 space-y-3">
                         @foreach($order->orderItems as $item)
                             <div class="flex justify-between items-center">
                                 <span class="font-medium text-gray-800">{{ $item->product->name }}</span>
-                                <span class="font-bold bg-gray-200 px-2 py-1 rounded">x{{ $item->quantity }}</span>
+                                <span class="font-bold bg-gray-200 px-2 py-1 rounded">x{{ $item->qty }}</span>
                             </div>
                         @endforeach
                     </div>

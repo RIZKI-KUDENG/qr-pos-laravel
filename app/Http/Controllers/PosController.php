@@ -27,7 +27,7 @@ class PosController extends Controller
             ->with(['products' => function ($query){
                 $query->where('is_active', true);
             }])
-            ->get(); // ->get() hanya dipanggil sekali di akhir
+            ->get(); 
 
         return view('client.pos.index', compact('tenant', 'categories'));
     }
@@ -61,7 +61,8 @@ class PosController extends Controller
             $order->tenant_id = $tenant->id;
             $order->status = 'pending'; // Status awal, nanti Dapur ubah jadi 'completed'
             // $order->qr_table_id = ... (Opsional jika POS dianggap meja kasir/takeaway)
-            $order->total_price = $request->total_amount;
+            $order->order_number = 'ORD-' . strtoupper(uniqid());
+            $order->total = $request->total_amount;
             $order->save();
 
             // 2. Simpan Item Order
@@ -69,7 +70,7 @@ class PosController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['id'],
-                    'quantity' => $item['qty'],
+                    'qty' => $item['qty'],
                     'price' => $item['price'],
                     'subtotal' => $item['price'] * $item['qty'],
                 ]);
@@ -78,8 +79,8 @@ class PosController extends Controller
             // 3. Simpan Pembayaran
             Payment::create([
                 'order_id' => $order->id,
-                'payment_method' => 'cash',
-                'amount_paid' => $request->cash_amount,
+                'method' => 'cash',
+                'amount' => $request->cash_amount,
                 'change_amount' => $request->cash_amount - $request->total_amount,
                 'status' => 'paid',
                 'transaction_id' => 'POS-' . time() . '-' . $order->id,
