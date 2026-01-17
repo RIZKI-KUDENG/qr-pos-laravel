@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    protected $guarded = ['id'];
     public function tenant()
     {
         return $this->belongsTo(Tenant::class);
@@ -15,6 +16,7 @@ class Order extends Model
     {
         return $this->belongsTo(QrTable::class);
     }
+
 
     public function orderItems()
     {
