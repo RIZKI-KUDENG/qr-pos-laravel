@@ -3,7 +3,7 @@ export default function posApp() {
         isModalOpen: false,
         cashAmount: '',
         changeAmount: 0,
-        customerName: 'Guest', 
+        customerName: 'Pelanggan Umum', // Default value agar tidak error validation
         loading: false,
 
         get cart() {
@@ -22,6 +22,7 @@ export default function posApp() {
             this.cashAmount = '';
             this.changeAmount = -this.grandTotal;
             this.isModalOpen = true;
+            // Focus ke input cash setelah modal terbuka
             setTimeout(() => {
                 const input = document.getElementById('cashInput');
                 if(input) input.focus();
@@ -39,6 +40,7 @@ export default function posApp() {
         },
 
         processPayment() {
+            // Validasi Input
             if (!this.cashAmount || Number(this.cashAmount) < this.grandTotal) {
                 alert('Uang tunai kurang dari total tagihan!');
                 return;
@@ -61,17 +63,19 @@ export default function posApp() {
                     cart: this.cart,
                     cash_amount: this.cashAmount,
                     total_amount: this.grandTotal,
-                    customer_name: this.customerName, 
+                    customer_name: this.customerName, // KIRIM DATA INI
                     status: 'paid'
                 })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.redirect_url) { 
+                if (data.redirect_url) { // Cek redirect_url sesuai update controller sebelumnya
                     alert(`Transaksi Berhasil!\nKembalian: Rp ${this.formatRupiah(this.changeAmount)}`);
                     this.$store.cart.clear();
                     this.isModalOpen = false;
-                    this.customerName = 'Pelanggan Umum'; 
+                    this.customerName = 'Pelanggan Umum'; // Reset nama
+                    // Opsional: Redirect ke halaman struk/status
+                    // window.location.href = data.redirect_url; 
                 } else {
                     alert('Gagal: ' + (data.message || 'Terjadi kesalahan validasi'));
                 }

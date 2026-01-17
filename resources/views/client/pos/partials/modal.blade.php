@@ -25,7 +25,7 @@
             <div class="p-6 space-y-6">
                 <div class="text-center space-y-1">
                     <p class="text-gray-500 text-sm">Total Tagihan</p>
-                    <h2 class="text-4xl font-extrabold text-black">Rp <span x-text="formatRupiah(grandTotal())"></span>
+                    <h2 class="text-4xl font-extrabold text-black">Rp <span x-text="formatRupiah(grandTotal)"></span>
                     </h2>
                 </div>
 
@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="flex gap-2 mt-2 overflow-x-auto no-scrollbar pb-1">
-                        <button @click="setCash(grandTotal())"
+                        <button @click="setCash(grandTotal)"
                             class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">Uang
                             Pas</button>
                         <button @click="setCash(50000)"
@@ -63,7 +63,7 @@
                 </div>
             </div>
 
-            <div class="p-6 bg-gray-50 border-t border-gray-100">
+            <div class="p-6 bg-gray-700 border-t border-gray-100">
                 <button @click="processPayment()" :disabled="cashAmount < grandTotal()"
                     :class="cashAmount < grandTotal() ? 'bg-gray-300 cursor-not-allowed' :
                         'bg-black hover:bg-gray-800 shadow-lg hover:shadow-xl'"
