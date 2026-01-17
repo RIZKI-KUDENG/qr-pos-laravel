@@ -21,8 +21,6 @@ class MenuController extends Controller{
     }
     public function table(Tenant $tenant, QrTable $qrTable)
     {
-        // Logika sama, tapi kita kirim data meja juga ke view
-        // Pastikan QrTable memang milik Tenant ini untuk keamanan
         if ($qrTable->tenant_id !== $tenant->id) {
             abort(404);
         }
@@ -35,7 +33,6 @@ class MenuController extends Controller{
     }
     public function storeOrder(Request $request, Tenant $tenant, QrTable $qrTable)
     {
-        // Validasi input
         $request->validate([
             'cart' => 'required|array|min:1',
             'cart.*.id' => 'required|exists:products,id',
@@ -44,26 +41,20 @@ class MenuController extends Controller{
 
         try {
             DB::beginTransaction();
-
-            // Hitung Total di server side untuk keamanan
             $totalAmount = 0;
             $cartItems = $request->input('cart');
-
-            // 1. Buat Order Baru
             $order = new Order();
             $order->tenant_id = $tenant->id;
             $order->qr_table_id = $qrTable->id;
-            // Generate nomor order unik, contoh: ORD-TIMESTAMP-RANDOM
             $order->order_number = 'ORD-' . time() . '-' . strtoupper(Str::random(4));
+            $order->customer_name = $request->customer_name ?? 'Guest';
             $order->status = 'pending';
-            $order->total = 0; // Nanti diupdate setelah hitung item
+            $order->total = 0; 
             $order->save();
 
-            // 2. Simpan Item Pesanan
             foreach ($cartItems as $item) {
                 $product = Product::find($item['id']);
                 
-                // Pastikan produk milik tenant ini (validasi keamanan)
                 if($product->tenant_id !== $tenant->id) {
                     continue; 
                 }
@@ -75,11 +66,9 @@ class MenuController extends Controller{
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'qty' => $item['qty'],
-                    'price' => $product->price, // Simpan harga saat transaksi terjadi
+                    'price' => $product->price, 
                 ]);
             }
-
-            // Update total harga di table orders
             $order->update(['total' => $totalAmount]);
 
             DB::commit();
@@ -87,12 +76,38 @@ class MenuController extends Controller{
             return response()->json([
                 'message' => 'Order created successfully',
                 'order_number' => $order->order_number,
-                // 'redirect_url' => route('client.order.status', $order->id) // Jika nanti ada halaman sukses
+                'redirect_url' => route('client.order.status', [
+                    'tenant' => $tenant->slug, 
+                    'orderNumber' => $order->order_number
+                ]),
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()], 500);
         }
+    }
+        public function showStatus(Tenant $tenant, $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)
+                      ->where('tenant_id', $tenant->id)
+                      ->with('orderItems.product')
+                      ->firstOrFail();
+
+        return view('client.menu.order-status', compact('tenant', 'order'));
+    }
+
+    public function cancelOrder(Tenant $tenant, $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)
+                      ->where('tenant_id', $tenant->id)
+                      ->firstOrFail();
+
+        if ($order->status === 'pending') {
+            $order->update(['status' => 'cancelled']);
+            return back()->with('success', 'Pesanan berhasil dibatalkan.');
+        }
+
+        return back()->with('error', 'Pesanan tidak dapat dibatalkan karena sudah diproses.');
     }
 }

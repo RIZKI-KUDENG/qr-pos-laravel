@@ -24,7 +24,7 @@ Route::middleware('auth')->group(function () {
 
 // Route::get('/{tenant:slug}/menu', [MenuController::class, 'index'])->name('client.menu');
 Route::get('/menu/{tenant:slug}/{qrTable}', [MenuController::class, 'table'])->name('client.menu');
-Route::post('/menu/{tenant:slug}/{qrTable}/order', [MenuController::class, 'store'])->name('client.order.store');
+Route::post('/menu/{tenant:slug}/{qrTable}/order', [MenuController::class, 'storeOrder'])->name('client.order.store');
 
 Route::get('/order/{tenant:slug}/{orderNumber}', [MenuController::class, 'showStatus'])->name('client.order.status');
 Route::post('/order/{tenant:slug}/{orderNumber}/cancel', [MenuController::class, 'cancelOrder'])->name('client.order.cancel');
@@ -36,7 +36,7 @@ Route::middleware('auth')->group(function () {
     
     // Tambahkan Route POS di sini
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
-    Route::post('/pos/order', [PosController::class, 'store'])->name('pos.store'); // Route untuk submit order
+    Route::post('/pos/order', [PosController::class, 'store'])->name('pos.store'); 
     Route::get('/products', ProductManager::class)->name('products.index');
     Route::get('/kitchen', KitchenDisplay::class)->name('kitchen.index');
     Route::get('/ordermanager', Ordermanager::class)->name('order.index');

@@ -9,7 +9,9 @@
 </head>
 
 <body class="bg-gray-100">
-    <div x-data="menuApp({ storeUrl: '{{ route('pos.store') }}'})" class="max-w-md mx-auto bg-white min-h-screen shadow-sm flex flex-col relative">
+    <div x-data="menuApp({
+        storeUrl: '{{ route('client.order.store', ['tenant' => $tenant->slug, 'qrTable' => $qrTable->id]) }}'
+    })" class="max-w-md mx-auto bg-white min-h-screen shadow-sm flex flex-col relative">
         @include('client.menu.partials.header')
         <main class="flex-1 p-4 pb-32 overflow-y-auto">
             @foreach ($categories as $category)

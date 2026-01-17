@@ -99,28 +99,7 @@ class PosController extends Controller
     }
 
 
-    public function showStatus(Tenant $tenant, $orderNumber)
-    {
-        $order = Order::where('order_number', $orderNumber)
-                      ->where('tenant_id', $tenant->id)
-                      ->with('orderItems.product')
-                      ->firstOrFail();
 
-        return view('client.menu.order-status', compact('tenant', 'order'));
-    }
 
-    public function cancelOrder(Tenant $tenant, $orderNumber)
-    {
-        $order = Order::where('order_number', $orderNumber)
-                      ->where('tenant_id', $tenant->id)
-                      ->firstOrFail();
-
-        if ($order->status === 'pending') {
-            $order->update(['status' => 'cancelled']);
-            return back()->with('success', 'Pesanan berhasil dibatalkan.');
-        }
-
-        return back()->with('error', 'Pesanan tidak dapat dibatalkan karena sudah diproses.');
-    }
 
 }

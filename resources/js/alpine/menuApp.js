@@ -43,7 +43,7 @@ export default function menuApp(config = {}) {
 
     this.loading = true;
 
-    fetch(`/menu/${this.tenantSlug}/${this.qrTableId}/order`, { 
+    fetch(this.storeUrl, { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
