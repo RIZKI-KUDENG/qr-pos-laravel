@@ -159,9 +159,6 @@
                                         );
                                     this.$store.cart.clear();
                                     this.isModalOpen = false;
-
-                                    // Opsional: Redirect ke halaman cetak struk atau refresh
-                                    // window.location.reload(); 
                                 } else {
                                     alert('Gagal menyimpan transaksi: ' + data.message);
                                 }

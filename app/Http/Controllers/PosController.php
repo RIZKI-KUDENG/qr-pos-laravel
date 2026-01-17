@@ -39,13 +39,14 @@ class PosController extends Controller
         'cart.*.id' => [
             'required', 
             Rule::exists('products', 'id')->where(function ($query) use ($user) {
-                return $query->where('tenant_id', $user->tenant_id);
+                return $query->where('tenant_id', $user->tenant->id);
             }),
         ],
         'cart.*.qty' => 'required|integer|min:1',
         'cart.*.price' => 'required|numeric|min:0', 
         'cash_amount' => 'required|numeric|min:0',
         'customer_name' => 'required|string|max:50',
+        'total_amount' => 'required|numeric|min:0',
     ]);
 
         $user = Auth::user();
@@ -97,7 +98,7 @@ class PosController extends Controller
         }
     }
 
-    
+
     public function showStatus(Tenant $tenant, $orderNumber)
     {
         $order = Order::where('order_number', $orderNumber)

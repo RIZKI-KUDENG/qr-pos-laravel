@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-      public function tenant()
+    public function tenant()
     {
         return $this->belongsTo(Tenant::class);
     }
@@ -31,5 +31,6 @@ class Order extends Model
         'customer_name',
         'status',
         'total',
+        'order_number',
     ];
 }
