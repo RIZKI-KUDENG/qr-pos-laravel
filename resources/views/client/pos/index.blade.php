@@ -29,7 +29,7 @@
     </style>
 </head>
 
-<body class="bg-gray-100 h-screen flex overflow-hidden" x-data="posPayment()">
+<body class="bg-gray-100 h-screen flex overflow-hidden" x-data="posApp()">
 
     <aside class="w-20 bg-black flex flex-col items-center py-6 text-white shrink-0 z-30">
         <div class="mb-8 p-2 bg-white/10 rounded-lg">
@@ -104,78 +104,7 @@
     </div>
     @include('client.pos.partials.modal')
 
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('posPayment', () => ({
-                isModalOpen: false,
-                cashAmount: '',
-                changeAmount: 0,
-
-                grandTotal() {
-                    return this.$store.cart.total
-                },
-
-                openPaymentModal() {
-                    this.cashAmount = '';
-                    this.changeAmount = -this.grandTotal();
-                    this.isModalOpen = true;
-                    setTimeout(() => document.getElementById('cashInput').focus(), 100);
-                },
-
-                calculateChange() {
-                    const cash = Number(this.cashAmount);
-                    this.changeAmount = cash - this.grandTotal();
-                },
-
-                setCash(amount) {
-                    this.cashAmount = amount;
-                    this.calculateChange();
-                },
-
-                processPayment() {
-                    if (Number(this.cashAmount) >= this.grandTotal()) {
-
-
-                        fetch('/pos/order', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector(
-                                        'meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                body: JSON.stringify({
-                                    cart: this.$store.cart.items,
-                                    cash_amount: this.cashAmount,
-                                    total_amount: this
-                                        .grandTotal(),
-                                        status: 'paid'
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.status === 'success') {
-                                    alert(
-                                        `Transaksi Berhasil!\nTotal: Rp ${this.formatRupiah(this.grandTotal())}\nKembalian: Rp ${this.formatRupiah(this.changeAmount)}`
-                                        );
-                                    this.$store.cart.clear();
-                                    this.isModalOpen = false;
-                                } else {
-                                    alert('Gagal menyimpan transaksi: ' + data.message);
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                alert('Terjadi kesalahan sistem.');
-                            });
-                    }
-                },
-
-                formatRupiah(number) {
-                    return new Intl.NumberFormat('id-ID').format(Math.floor(number));
-                }
-            }));
-        });
-    </script>
+   
 </body>
 
 </html>
