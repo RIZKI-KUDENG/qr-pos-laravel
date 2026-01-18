@@ -100,6 +100,7 @@ class Ordermanager extends Component
 
         $orders = Order::with(['orderItems.product', 'qrTable'])
             ->where('tenant_id', $user->tenant_id)
+            ->whereDate('created_at', today())
             ->when($this->statusFilter !== 'all', function ($query) {
                 $query->where('status', $this->statusFilter);
             })
@@ -121,6 +122,7 @@ class Ordermanager extends Component
  private function getStatusCounts($tenantId)
     {
         return Order::where('tenant_id', $tenantId)
+            ->whereDate('created_at', today())
             ->selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')

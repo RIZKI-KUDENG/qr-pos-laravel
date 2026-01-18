@@ -16,12 +16,6 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
 Route::get('/menu/{tenant:slug}/{qrTable}', [MenuController::class, 'table'])->name('client.menu');
 Route::post('/menu/{tenant:slug}/{qrTable}/order', [MenuController::class, 'storeOrder'])->name('client.order.store');
 
@@ -29,13 +23,16 @@ Route::get('/order/{tenant:slug}/{orderNumber}', [MenuController::class, 'showSt
 Route::post('/order/{tenant:slug}/{orderNumber}/cancel', [MenuController::class, 'cancelOrder'])->name('client.order.cancel');
 
 Route::middleware('auth')->group(function () {
+    //Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // Tambahkan Route POS di sini
+    //POS
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::post('/pos/order', [PosController::class, 'store'])->name('pos.store'); 
+
+    //Livewire Routes
     Route::get('/products', ProductManager::class)->name('products.index');
     Route::get('/kitchen', KitchenDisplay::class)->name('kitchen.index');
     Route::get('/ordermanager', Ordermanager::class)->name('order.index');

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-      public function tenant()
+    public function tenant()
     {
         return $this->belongsTo(Tenant::class);
     }
