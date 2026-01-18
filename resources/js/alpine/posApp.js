@@ -3,8 +3,10 @@ export default function posApp() {
         isModalOpen: false,
         cashAmount: '',
         changeAmount: 0,
-        customerName: 'Pelanggan Umum', // Default value agar tidak error validation
+        customerName: 'Pelanggan Umum', 
         loading: false,
+        selectedOrder: null,
+        isPaymentModalOpen: false,
 
         get cart() {
             return this.$store.cart.items;
@@ -15,16 +17,15 @@ export default function posApp() {
         },
 
         openPaymentModal() {
-            if (this.cart.length === 0) {
-                alert('Keranjang pesanan masih kosong!');
-                return;
-            }
-            this.cashAmount = '';
-            this.changeAmount = -this.grandTotal;
-            this.isModalOpen = true;
-            // Focus ke input cash setelah modal terbuka
+           this.selectedOrder = data;     // Simpan data order (ID, Nama, Meja)
+            this.grandTotal = data.total;  // Set total tagihan
+            this.cashAmount = '';          // Reset input uang
+            this.changeAmount = -this.grandTotal; 
+            this.isPaymentModalOpen = true; // Buka modal (sesuai nama variabel di HTML)
+
+            // Auto focus ke input
             setTimeout(() => {
-                const input = document.getElementById('cashInput');
+                const input = document.getElementById('cashInputManager');
                 if(input) input.focus();
             }, 100);
         },
@@ -63,19 +64,17 @@ export default function posApp() {
                     cart: this.cart,
                     cash_amount: this.cashAmount,
                     total_amount: this.grandTotal,
-                    customer_name: this.customerName, // KIRIM DATA INI
+                    customer_name: this.customerName, 
                     status: 'paid'
                 })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.redirect_url) { // Cek redirect_url sesuai update controller sebelumnya
+                if (data) { 
                     alert(`Transaksi Berhasil!\nKembalian: Rp ${this.formatRupiah(this.changeAmount)}`);
                     this.$store.cart.clear();
                     this.isModalOpen = false;
-                    this.customerName = 'Pelanggan Umum'; // Reset nama
-                    // Opsional: Redirect ke halaman struk/status
-                    // window.location.href = data.redirect_url; 
+                    this.customerName = 'Pelanggan Umum'; 
                 } else {
                     alert('Gagal: ' + (data.message || 'Terjadi kesalahan validasi'));
                 }
