@@ -12,9 +12,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+
 
 Route::get('/menu/{tenant:slug}/{qrTable}', [MenuController::class, 'table'])->name('client.menu');
 Route::post('/menu/{tenant:slug}/{qrTable}/order', [MenuController::class, 'storeOrder'])->name('client.order.store');
