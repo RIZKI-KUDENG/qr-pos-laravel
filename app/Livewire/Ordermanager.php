@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Models\Order;
 use App\Models\Payment;
 use Livewire\Component;
-use Livewire\WithPagination;
+use Livewire\WithPagination; 
 use Illuminate\Support\Facades\Auth;
 
 class Ordermanager extends Component
@@ -17,10 +17,31 @@ class Ordermanager extends Component
     
     public $isPaymentModalOpen = false;
     public $selectedOrderId = null;
+
+    
+
     public $cashAmount = ''; 
     public $changeAmount = 0;
 
-    protected $queryString = ['statusFilter', 'search'];
+
+    protected $queryString = [
+        'statusFilter' => ['except' => 'all'],
+        'search' => ['except' => '']
+    ];
+
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+
+    public function setFilter($status)
+    {
+        $this->statusFilter = $status;
+        $this->resetPage(); 
+    }
+    
 
     public function getSelectedOrderProperty()
     {
@@ -31,42 +52,46 @@ class Ordermanager extends Component
             ->find($this->selectedOrderId);
     }
 
+
     public function openPaymentModal($orderId)
     {
         $order = Order::where('tenant_id', Auth::user()->tenant_id)->find($orderId);
 
-        if (!$order || $order->status !== 'pending') return;
-
-        $this->selectedOrderId = $order->id;
-        $this->cashAmount = ''; 
-        $this->changeAmount = -$order->total; 
-        $this->isPaymentModalOpen = true;
+        if ($order && $order->status === 'pending') {
+            $this->selectedOrderId = $order->id;
+            $this->cashAmount = ''; 
+            $this->changeAmount = -$order->total; 
+            
+            // Perintah Khusus ke Browser: "Buka Modal Sekarang!"
+            $this->dispatch('open-payment-modal'); 
+        }
     }
 
 
-    public function updatedCashAmount($value)
+    public function updatedCashAmount()
     {
-
-        if (!$this->selectedOrder) return;
-
-
-        $cash = empty($value) ? 0 : (int) $value;
+        $cash = (int) ($this->cashAmount ?? 0);
+        $total = $this->selectedOrder ? $this->selectedOrder->total : 0;
         
-        $this->changeAmount = $cash - $this->selectedOrder->total;
+        $this->changeAmount = $cash - $total;
     }
 
-    public function submitPayment()
+
+    public function setQuickCash($amount)
+    {
+        $this->cashAmount = $amount;
+        $this->updatedCashAmount(); 
+    }
+
+    // Action: Submit Pembayaran
+ public function submitPayment()
     {
         $order = $this->selectedOrder;
-
         if (!$order) return;
 
-
         if ((int)$this->cashAmount < $order->total) {
-            $this->addError('cashAmount', 'Uang kurang');
             return;
         }
-
 
         Payment::create([
             'order_id' => $order->id,
@@ -75,25 +100,19 @@ class Ordermanager extends Component
             'status'   => 'paid',
         ]);
 
-
         $order->update(['status' => 'paid']);
 
-
-        $this->reset([
-            'isPaymentModalOpen',
-            'selectedOrderId',
-            'cashAmount',
-            'changeAmount'
-        ]);
-        
+        $this->closePaymentModal(); // Panggil fungsi close di atas
     }
-
-    public function setFilter($status)
+    public function closePaymentModal()
     {
-        $this->statusFilter = $status;
-        $this->resetPage();
+        $this->reset(['selectedOrderId', 'cashAmount', 'changeAmount']);
+        
+        // Perintah Khusus ke Browser: "Tutup Modal Sekarang!"
+        $this->dispatch('close-payment-modal');
     }
 
+    // Action: Update Status (Tolak / Selesai)
     public function updateStatus($orderId, $newStatus)
     {
         $order = Order::where('tenant_id', Auth::user()->tenant_id)->find($orderId);
@@ -118,8 +137,8 @@ class Ordermanager extends Component
                         ->orWhere('order_number', 'like', '%' . $this->search . '%');
                 });
             })
-            ->latest()
-            ->paginate(3);
+            ->latest() 
+            ->paginate(6);
 
         return view('livewire.ordermanager', [
             'orders' => $orders,

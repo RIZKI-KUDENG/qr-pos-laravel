@@ -1,5 +1,5 @@
-<div class="p-6 bg-gray-50 min-h-screen" x-data> 
-
+<div class="p-6 bg-gray-50 min-h-screen"> 
+    
     {{-- Header & Search --}}
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
@@ -7,6 +7,7 @@
             <p class="text-gray-500 text-sm">Pantau dan kelola pesanan masuk secara real-time.</p>
         </div>
         <div class="w-full md:w-1/3" wire:ignore>
+            {{-- Search Input: Tambahkan wire:model.live --}}
             <input wire:model.live.debounce.300ms="search" type="text" placeholder="Cari Nama / No Order..."
                 class="w-full rounded-xl border-gray-300 focus:border-black focus:ring-black shadow-sm">
         </div>
@@ -30,7 +31,8 @@
     </div>
 
     {{-- Grid Orders --}}
-    <div wire:poll.5s class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    {{-- wire:poll opsional, matikan jika bikin berat --}}
+    <div wire:poll.10s class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         @forelse ($orders as $order)
             <div wire:key="order-{{ $order->id }}"
                 class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full"
@@ -97,6 +99,7 @@
                         <span class="text-sm text-gray-500">Total Tagihan</span>
                         <span class="font-bold text-lg text-gray-900">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
                     </div>
+
                     <div class="grid grid-cols-2 gap-2">
                         @if ($order->status === 'pending')
                             <button wire:loading.attr="disabled"
@@ -105,10 +108,12 @@
                                 class="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition">
                                 Tolak
                             </button>
-                            <button wire:click="openPaymentModal({{ $order->id }})"
-                                class="px-3 py-2 text-sm font-bold text-white bg-black hover:bg-gray-800 rounded-lg transition shadow-md">
-                                Terima & Masak
-                            </button>
+                            {{-- Tombol Terima & Masak: Panggil fungsi Livewire --}}
+                            <button 
+    wire:click="openPaymentModal({{ $order->id }})"
+    class="px-3 py-2 text-sm font-bold text-white bg-black hover:bg-gray-800 rounded-lg transition shadow-md">
+    Terima & Masak
+</button>
                         @elseif($order->status === 'paid')
                             <button wire:click="updateStatus({{ $order->id }}, 'completed')" wire:loading.attr="disabled"
                                 class="col-span-2 px-3 py-2 text-sm font-bold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
@@ -130,95 +135,118 @@
         @endforelse
     </div>
 
-    <div class="mt-8">{{ $orders->links() }}</div>
+    <div class="mt-8">
+        {{ $orders->links() }}
+    </div>
+    <div class="fixed bottom-4 right-4 bg-black text-white p-2 text-xs">
+    Modal: {{ $isPaymentModalOpen ? 'OPEN' : 'CLOSED' }}
+</div>
+<div class="fixed bottom-10 right-8 bg-black text-white p-2 text-xs">
+    Selected: {{ $selectedOrderId ?? 'null' }}
+</div>
 
-    <div wire:ignore.self x-data x-show="@entangle('isPaymentModalOpen')" style="display: none;"
+    {{-- PAYMENT MODAL --}}
+    <div 
+        x-data="{ show: false }"
+        x-show="show"
+        x-on:open-payment-modal.window="show = true"   {{-- Dengar Perintah Buka --}}
+        x-on:close-payment-modal.window="show = false" {{-- Dengar Perintah Tutup --}}
+        x-on:keydown.escape.window="show = false"
+        x-cloak
+        style="display: none;"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
 
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-100"
-            @click.away="$wire.set('isPaymentModalOpen', false)">
+            @click.away="show = false">
             
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-gray-800">Pembayaran</h3>
-                <button @click="$wire.set('isPaymentModalOpen', false)" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                <button wire:click="closePaymentModal" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
 
-            @if($this->selectedOrder)
-                <div class="p-6 space-y-6">
-                    <div class="text-center border-b border-gray-100 pb-4">
-                        <p class="text-gray-500 text-sm mb-1">Pelanggan</p>
-
-                        <p class="font-bold text-lg">{{ $this->selectedOrder->customer_name ?? 'Tanpa Nama' }}</p>
-                        <p class="text-xs text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded mt-1">
-                            {{ $this->selectedOrder->qrTable ? 'Meja ' . $this->selectedOrder->qrTable->name : 'POS / Kasir' }}
-                        </p>
-                    </div>
-
-                    <div class="text-center space-y-1">
-                        <p class="text-gray-500 text-sm">Total Tagihan</p>
-                        <h2 class="text-4xl font-extrabold text-black">
-                            Rp {{ number_format($this->selectedOrder->total ?? 0, 0, ',', '.') }}
-                        </h2>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-700">Uang Tunai Diterima</label>
-                        <div class="relative group">
-                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500 font-bold group-focus-within:text-black">Rp</span>
-
-                            <input type="number" wire:model.live="cashAmount"
-                                class="w-full pl-12 pr-4 py-3 rounded-xl border-gray-200 focus:border-black focus:ring-black font-bold text-lg transition-shadow"
-                                placeholder="0" autofocus>
+            {{-- Kita bungkus konten dengan wire:key agar Livewire merender ulang saat ID berubah --}}
+            <div wire:key="modal-content-{{ $selectedOrderId }}">
+                @if($this->selectedOrder)
+                    <div class="p-6 space-y-6">
+                        <div class="text-center border-b border-gray-100 pb-4">
+                            <p class="text-gray-500 text-sm mb-1">Pelanggan</p>
+                            <p class="font-bold text-lg">{{ $this->selectedOrder->customer_name ?? 'Tanpa Nama' }}</p>
+                            <p class="text-xs text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded mt-1">
+                                {{ $this->selectedOrder->qrTable ? 'Meja ' . $this->selectedOrder->qrTable->name : 'POS / Kasir' }}
+                            </p>
                         </div>
 
+                        <div class="text-center space-y-1">
+                            <p class="text-gray-500 text-sm">Total Tagihan</p>
+                            <h2 class="text-4xl font-extrabold text-black">
+                                Rp {{ number_format($this->selectedOrder->total, 0, ',', '.') }}
+                            </h2>
+                        </div>
 
-                        <div class="flex gap-2 mt-2 overflow-x-auto no-scrollbar pb-1">
-                            <button wire:click="$set('cashAmount', {{ $this->selectedOrder->total }})"
-                                class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">
-                                Uang Pas
-                            </button>
-                            <button wire:click="$set('cashAmount', 50000)"
-                                class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">
-                                50.000
-                            </button>
-                            <button wire:click="$set('cashAmount', 100000)"
-                                class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">
-                                100.000
-                            </button>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">Uang Tunai Diterima</label>
+                            <div class="relative group">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500 font-bold group-focus-within:text-black">Rp</span>
+                                <input type="number" wire:model.live="cashAmount"
+                                    class="w-full pl-12 pr-4 py-3 rounded-xl border-gray-200 focus:border-black focus:ring-black font-bold text-lg transition-shadow"
+                                    placeholder="0" autofocus>
+                            </div>
+
+                            <div class="flex gap-2 mt-2 overflow-x-auto no-scrollbar pb-1">
+                                <button wire:click="setQuickCash({{ $this->selectedOrder->total }})"
+                                    class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">
+                                    Uang Pas
+                                </button>
+                                <button wire:click="setQuickCash(50000)"
+                                    class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">
+                                    50.000
+                                </button>
+                                <button wire:click="setQuickCash(100000)"
+                                    class="flex-shrink-0 bg-gray-100 text-xs font-medium px-3 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-200">
+                                    100.000
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-4 border border-dashed border-gray-300">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-gray-600">Kembalian</span>
+                                <span class="font-bold text-2xl {{ $changeAmount >= 0 ? 'text-green-600' : 'text-red-500' }}">
+                                    Rp {{ number_format($changeAmount < 0 ? 0 : $changeAmount, 0, ',', '.') }}
+                                </span>
+                            </div>
+                            @if($changeAmount < 0)
+                                <p class="text-xs text-red-500 text-right mt-1 font-medium">Uang masih kurang!</p>
+                            @endif
                         </div>
                     </div>
 
-
-                    <div class="bg-gray-50 rounded-xl p-4 border border-dashed border-gray-300">
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium text-gray-600">Kembalian</span>
-                            <span class="font-bold text-2xl {{ $changeAmount >= 0 ? 'text-green-600' : 'text-red-500' }}">
-                                Rp {{ number_format($changeAmount < 0 ? 0 : $changeAmount, 0, ',', '.') }}
-                            </span>
-                        </div>
-                        @if($changeAmount < 0)
-                            <p class="text-xs text-red-500 text-right mt-1 font-medium">Uang masih kurang!</p>
-                        @endif
+                    <div class="p-6 bg-gray-800 border-t border-gray-100">
+                        <button wire:click="submitPayment" wire:loading.attr="disabled"
+                            @if($changeAmount < 0) disabled @endif
+                            class="{{ $changeAmount < 0 ? 'bg-gray-500 cursor-not-allowed' : 'bg-white text-black hover:bg-gray-100' }} w-full py-3.5 rounded-xl font-bold text-lg transition-all shadow-lg flex justify-center">
+                            <span wire:loading.remove>{{ $changeAmount < 0 ? 'Uang Kurang' : 'Bayar & Proses' }}</span>
+                            <span wire:loading>Memproses...</span>
+                        </button>
                     </div>
-                </div>
-
-                <div class="p-6 bg-gray-800 border-t border-gray-100">
-                    <button wire:click="submitPayment" wire:loading.attr="disabled"
-                        @if($changeAmount < 0) disabled @endif
-                        class="{{ $changeAmount < 0 ? 'bg-gray-500 cursor-not-allowed' : 'bg-white text-black hover:bg-gray-100' }} w-full py-3.5 rounded-xl font-bold text-lg transition-all shadow-lg">
-                        {{ $changeAmount < 0 ? 'Uang Kurang' : 'Bayar & Proses' }}
-                    </button>
-                </div>
-            @else
-                 <div class="p-12 text-center text-gray-500">Memuat data...</div>
-            @endif
+                @else
+                    {{-- Loading State --}}
+                    <div class="p-12 text-center text-gray-400">
+                         <svg class="w-10 h-10 mx-auto mb-3 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p>Memuat Data...</p>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </div>

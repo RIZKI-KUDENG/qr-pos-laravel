@@ -3,10 +3,8 @@ export default function posApp() {
         isModalOpen: false,
         cashAmount: '',
         changeAmount: 0,
-        customerName: 'Pelanggan Umum', 
+        customerName: 'Pelanggan Umum', // Default value agar tidak error validation
         loading: false,
-        selectedOrder: null,
-        isPaymentModalOpen: false,
 
         get cart() {
             return this.$store.cart.items;
@@ -17,15 +15,15 @@ export default function posApp() {
         },
 
         openPaymentModal() {
-           this.selectedOrder = data;     // Simpan data order (ID, Nama, Meja)
-            this.grandTotal = data.total;  // Set total tagihan
-            this.cashAmount = '';          // Reset input uang
-            this.changeAmount = -this.grandTotal; 
-            this.isPaymentModalOpen = true; // Buka modal (sesuai nama variabel di HTML)
-
-            // Auto focus ke input
+            if (this.cart.length === 0) {
+                alert('Keranjang pesanan masih kosong!');
+                return;
+            }
+            this.cashAmount = '';
+            this.changeAmount = -this.grandTotal;
+            this.isModalOpen = true;
             setTimeout(() => {
-                const input = document.getElementById('cashInputManager');
+                const input = document.getElementById('cashInput');
                 if(input) input.focus();
             }, 100);
         },
