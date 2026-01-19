@@ -1,4 +1,6 @@
 <div 
+ x-show="matchesSearch('{{ strtolower($product->name) }}')"
+    x-transition
     @click="$store.cart.add({{ json_encode($product) }})"
     class="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm hover:shadow-lg hover:border-primary-200 transition-all duration-300 cursor-pointer group flex flex-col h-full relative overflow-hidden"
 >

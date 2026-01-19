@@ -60,6 +60,27 @@
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Menu Order</h1>
                         <p class="text-gray-500 text-sm">{{ now()->format('l, d F Y') }}</p>
+                        <div class="flex gap-2 mt-4 overflow-x-auto no-scrollbar">
+    <button
+        @click="activeCategory = 'all'"
+        :class="activeCategory === 'all' 
+            ? 'bg-black text-white' 
+            : 'bg-white text-gray-700 border'"
+        class="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition">
+        Semua
+    </button>
+
+    @foreach ($categories as $category)
+        <button
+            @click="activeCategory = {{ $category->id }}"
+            :class="activeCategory == {{ $category->id }} 
+                ? 'bg-black text-white' 
+                : 'bg-white text-gray-700 border'"
+            class="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition">
+            {{ $category->name }}
+        </button>
+    @endforeach
+</div>
                     </div>
 
                     <div class="relative w-72">
@@ -69,7 +90,7 @@
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </span>
-                        <input type="text" placeholder="Cari menu..."
+                        <input type="text" placeholder="Cari menu..." x-model="search"
                             class="pl-10 w-full rounded-xl border-gray-200 focus:border-black focus:ring-black transition-colors">
                     </div>
                 </div>
@@ -77,7 +98,10 @@
                 <div class="space-y-10">
                     @forelse($categories as $category)
                         @if ($category->products->count() > 0)
-                            <div id="category-{{ $category->id }}">
+                            <div id="category-{{ $category->id }}"
+                                x-show="activeCategory === 'all' || activeCategory == {{ $category->id }}"
+                                x-transition
+                                >
                                 <div class="flex items-center gap-2 mb-4">
                                     <div class="w-1 h-6 bg-black rounded-full"></div>
                                     <h2 class="text-xl font-bold text-gray-800">{{ $category->name }}</h2>

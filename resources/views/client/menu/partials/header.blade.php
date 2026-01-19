@@ -5,4 +5,25 @@
                     Meja {{ $qrTable->table_number }}
                 </p>
             @endif
+            <div class="mt-4 flex overflow-x-auto">
+                 <button
+        @click="activeCategory = 'all'"
+        :class="activeCategory === 'all' 
+            ? 'bg-black text-white' 
+            : 'bg-white text-gray-700 border'"
+        class="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition">
+        Semua
+    </button>
+
+    @foreach ($categories as $category)
+        <button
+            @click="activeCategory = {{ $category->id }}"
+            :class="activeCategory == {{ $category->id }} 
+                ? 'bg-black text-white' 
+                : 'bg-white text-gray-700 border'"
+            class="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition">
+            {{ $category->name }}
+        </button>
+    @endforeach
+            </div>
         </header>

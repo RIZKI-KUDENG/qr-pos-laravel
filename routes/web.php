@@ -21,10 +21,6 @@ Route::get('/order/{tenant:slug}/{orderNumber}', [MenuController::class, 'showSt
 Route::post('/order/{tenant:slug}/{orderNumber}/cancel', [MenuController::class, 'cancelOrder'])->name('client.order.cancel');
 
 Route::middleware('auth')->group(function () {
-    //Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     //POS
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');

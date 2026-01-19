@@ -2,12 +2,15 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\Product;
+use Livewire\Component;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 
 class ProductManager extends Component
 {
+
+    use WithPagination;
     public function toggleStatus($id)
     {
         $product = Product::findOrFail($id);
@@ -24,7 +27,7 @@ class ProductManager extends Component
             'products' => Product::where('tenant_id', Auth::user()->tenant_id)
                 ->with('category')
                 ->orderBy('category_id')
-                ->get()
+                ->paginate(10)
         ]);
     }
 }

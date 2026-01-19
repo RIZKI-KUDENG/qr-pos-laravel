@@ -13,11 +13,21 @@ use App\Http\Controllers\Controller;
 class MenuController extends Controller{
 
 
-    public function index(Tenant $tenant){
-        $categories = $tenant->categories()->get()->with(['products' => function ($query){
-            $query->where('is_active', true);
-        }])->get();
-        return view('client.menu.index', compact('tenant', 'categories'));
+    public function index(Tenant $tenant, Request $request){
+         $categoryFilter = $request->get('category', 'all');
+        $search = $request->get('search', '');
+        $categories = $tenant->categories()
+            ->when($categoryFilter !== 'all', function ($q) use ($categoryFilter) {
+                $q->where('id', $categoryFilter);
+            })
+            ->with(['products' => function ($query) use ($search) {
+                $query->where('is_active', true)
+                    ->when($search, function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            }])
+            ->get();
+        return view('client.menu.index', compact('tenant', 'categories', 'categoryFilter', 'search'));
     }
     public function table(Tenant $tenant, QrTable $qrTable)
     {

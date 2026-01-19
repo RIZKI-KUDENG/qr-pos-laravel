@@ -19,7 +19,10 @@
                     {{ $category->name }}
                 </h2>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-3"
+                x-show="activeCategory === 'all' || activeCategory == {{ $category->id }}"
+                x-transition
+                >
                     @foreach ($category->products as $product)
                         @include('client.menu.partials.product-card', ['product' => $product])
                     @endforeach

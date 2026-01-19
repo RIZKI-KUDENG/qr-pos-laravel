@@ -36,6 +36,7 @@ class ProductForm
                     ->image()
                     ->disk('public')
                     ->directory('products')
+                    ->visibility('public')
                     ->imagePreviewHeight('200')
                     ->maxSize(1024) 
                     ->nullable(),

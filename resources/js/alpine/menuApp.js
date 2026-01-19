@@ -6,6 +6,7 @@ export default function menuApp(config = {}) {
         selectedProduct: null,
         loading: false,
         customerName: '',
+        activeCategory: 'all',
         get cart() {
             return this.$store.cart.items;
         },
@@ -14,6 +15,10 @@ export default function menuApp(config = {}) {
         },
         get cartCount() {
             return this.$store.cart.count;
+        },
+        setActiveCategory(categoryId){
+            if(this.activeCategory === "all") return true
+            return this.activeCategory == categoryId
         },
         openProduct(product) {
             this.selectedProduct = product
