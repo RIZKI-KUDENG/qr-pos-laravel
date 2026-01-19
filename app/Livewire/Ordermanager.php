@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Models\Order;
 use App\Models\Payment;
 use Livewire\Component;
-use Livewire\WithPagination; 
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 
 class Ordermanager extends Component
@@ -19,7 +19,7 @@ class Ordermanager extends Component
     public $selectedOrder = null;
     public $changeAmount = 0;
 
- protected $queryString = [
+    protected $queryString = [
         'statusFilter' => ['except' => 'all'],
         'search' => ['except' => '']
     ];
@@ -30,23 +30,24 @@ class Ordermanager extends Component
         $this->resetPage();
     }
     public function updatedStatusFilter()
-{
-    $this->resetPage();
-}
+    {
+        $this->resetPage();
+    }
 
 
     public function setFilter($status)
     {
         $this->statusFilter = $status;
-        $this->resetPage(); 
+        $this->resetPage();
     }
-       public function updatedCashAmount()
-{
-    $this->updateChangeAmount();
-}
-    public function openPaymentModal($orderId){
+    public function updatedCashAmount()
+    {
+        $this->updateChangeAmount();
+    }
+    public function openPaymentModal($orderId)
+    {
         $order = Order::find($orderId);
-         if (!$order || $order->status !== 'pending') return;
+        if (!$order || $order->status !== 'pending') return;
         $this->selectedOrderId = $order->id;
         $this->selectedOrder = $order;
         $this->cashAmount = '';
@@ -54,7 +55,7 @@ class Ordermanager extends Component
         $this->updateChangeAmount();
         $this->isPaymentModalOpen = true;
     }
-     public function closePaymentModal()
+    public function closePaymentModal()
     {
         $this->isPaymentModalOpen = false;
     }
@@ -64,13 +65,14 @@ class Ordermanager extends Component
         $this->cashAmount = $amount;
         $this->updateChangeAmount();
     }
-    public function updateChangeAmount(){
+    public function updateChangeAmount()
+    {
         $cash = (int) ($this->cashAmount == '' ? 0 : $this->cashAmount);
         $total = $this->selectedOrder ? $this->selectedOrder->total : 0;
-        
+
         $this->changeAmount = $cash - $total;
     }
- 
+
 
     public function submitPayment()
     {
@@ -79,11 +81,13 @@ class Ordermanager extends Component
         if (!$order) return;
         $order->status = 'paid';
         $order->save();
+        $url = route('pos.print', ['orderNumber' => $order->order_number]);
+        $this->dispatch('open-print-window', url: $url);
 
         $this->closePaymentModal();
     }
 
-     public function updateStatus($orderId, $newStatus)
+    public function updateStatus($orderId, $newStatus)
     {
         $order = Order::where('tenant_id', Auth::user()->tenant_id)->find($orderId);
 
@@ -94,7 +98,7 @@ class Ordermanager extends Component
 
 
 
- public function render()
+    public function render()
     {
         $user = Auth::user();
 
@@ -110,7 +114,7 @@ class Ordermanager extends Component
                         ->orWhere('order_number', 'like', '%' . $this->search . '%');
                 });
             })
-            ->latest() 
+            ->latest()
             ->paginate(6);
 
         return view('livewire.ordermanager', [
@@ -119,7 +123,7 @@ class Ordermanager extends Component
         ]);
     }
 
- private function getStatusCounts($tenantId)
+    private function getStatusCounts($tenantId)
     {
         return Order::where('tenant_id', $tenantId)
             ->whereDate('created_at', today())

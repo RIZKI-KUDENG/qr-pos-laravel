@@ -15,7 +15,7 @@
                     <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-start">
                         <div>
                             <span class="text-xs font-bold text-gray-400">ORDER #{{ $order->id }}</span>
-                            <div class="font-bold text-lg">{{ $order->created_at->format('H:i') }}</div>
+                            <div class="font-bold text-lg">{{ $order->created_at->diffForHumans() }}</div>
                         </div>
                         <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">{{ strtoupper($order->status) }}</span>
                     </div>

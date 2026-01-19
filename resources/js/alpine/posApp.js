@@ -80,19 +80,19 @@ export default function posApp() {
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    if (data) {
-                        alert(
-                            `Transaksi Berhasil!\nKembalian: Rp ${this.formatRupiah(this.changeAmount)}`,
-                        );
-                        this.$store.cart.clear();
-                        this.isModalOpen = false;
-                        this.customerName = "Pelanggan Umum";
-                    } else {
-                        alert(
-                            "Gagal: " +
-                                (data.message || "Terjadi kesalahan validasi"),
-                        );
-                    }
+                   if (data.status === 'success') { 
+            
+            const printWindow = window.open(data.print_url, '_blank', 'width=400,height=600');
+            if (!printWindow) {
+                alert('Pop-up print diblokir oleh browser. Izinkan pop-up untuk situs ini.');
+            }
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+
+        } else {
+            alert("Gagal: " + (data.message || "Terjadi kesalahan validasi"));
+        }
                 })
                 .catch((error) => {
                     console.error("Error:", error);

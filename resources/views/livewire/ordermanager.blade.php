@@ -206,4 +206,12 @@
             </div>
         </div>
     @endif
+    @script
+<script>
+    $wire.on('open-print-window', (event) => {
+        const url = event.url; 
+        window.open(url, '_blank', 'width=400,height=600');
+    });
+</script>
+@endscript
 </div>

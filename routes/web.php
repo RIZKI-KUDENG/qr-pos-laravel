@@ -24,7 +24,9 @@ Route::middleware('auth')->group(function () {
     
     //POS
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
-    Route::post('/pos/order', [PosController::class, 'store'])->name('pos.store'); 
+    Route::post('/pos/order', [PosController::class, 'store'])->name('pos.store');
+    Route::get('/orders/{orderNumber}/print', [PosController::class, 'printStruk'])
+    ->name('pos.print');
 
     //Livewire Routes
     Route::get('/products', ProductManager::class)->name('products.index');

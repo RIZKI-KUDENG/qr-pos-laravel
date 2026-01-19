@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Actions\StoreOrderAction;
+use App\Models\Order;
 use App\Models\Product;
 
 class PosController extends Controller
@@ -42,6 +43,20 @@ class PosController extends Controller
             compact('tenant', 'categories', 'categoryFilter', 'search')
         );
     }
+    public function printStruk($orderNumber){
+        $user = Auth::user();
+
+        $order = Order::where('order_number', $orderNumber)
+        ->where('tenant_id', $user->tenant_id)
+        ->with([
+            'orderItems.product',
+            'payment'
+        ])
+        ->firstOrFail();
+    $tenant = $user->tenant;
+        return view('client.pos.print-struk', compact('order', 'tenant'));
+
+    }
 
 
     public function store(Request $request, StoreOrderAction $storeOrder)
@@ -65,6 +80,7 @@ class PosController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Order created successfully',
+            'print_url' => route('pos.print', ['orderNumber' => $order->order_number]),
             'redirect_url' => route('client.order.status', [
                 'tenant' => $user->tenant->slug,
                 'orderNumber' => $order->order_number,
