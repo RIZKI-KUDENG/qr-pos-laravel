@@ -8,8 +8,11 @@
     "require": {
         "php": "^8.4.16",
         "filament/filament": "^4.0",
+        "flowframe/laravel-trend": "*",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "openspout/openspout": "^4.32",
+        "pxlrbt/filament-excel": "3.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^6.24"
     },

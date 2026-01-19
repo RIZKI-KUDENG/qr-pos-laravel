@@ -2,11 +2,18 @@
 
 namespace App\Filament\Owner\Resources\Orders\Tables;
 
+use Filament\Tables\Table;
+use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
+use App\Filament\Exporters\OrderExporter;
+
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Actions\ExportAction;
+
+
+
+
 
 class OrdersTable
 {
@@ -23,7 +30,14 @@ class OrdersTable
                 TextColumn::make('order_number')
                     ->searchable(),
                 TextColumn::make('status')
-                    ->badge(),
+                    ->badge()->color(
+                        fn(string $state): string => match ($state) {
+                            'paid' => 'success',
+                            'pending' => 'warning',
+                            'cancelled' => 'danger',
+                            default => 'gray',
+                        }
+                    ),
                 TextColumn::make('total')
                     ->numeric()
                     ->sortable(),
@@ -38,6 +52,17 @@ class OrdersTable
             ])
             ->filters([
                 //
+            ])
+            ->headerActions([
+                // Ganti dengan kode Native Export ini:
+                ExportAction::make() 
+                    ->exporter(OrderExporter::class) // Panggil class yang kita buat di langkah 2
+                    ->label('Export Excel')
+                    ->color('success')
+                    ->formats([
+                        \Filament\Actions\Exports\Enums\ExportFormat::Xlsx, // Opsi Excel
+                        \Filament\Actions\Exports\Enums\ExportFormat::Csv,  // Opsi CSV
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -14,10 +14,15 @@ class StoreOrderAction
     {
         return DB::transaction(function () use ($data, $tenantId) {
 
+        do {
+             $random = strtoupper(Str::random(5));
+             $orderNumber = "POS-{$tenantId}-" . date('ymd') . "-{$random}";
+        } while (Order::where('tenant_id', $tenantId)->where('order_number', $orderNumber)->exists());
+
             $order = Order::create([
                 'tenant_id' => $tenantId,
                 'status' => $data['status'] ?? 'paid',
-                'order_number' => 'POS-' . strtoupper(Str::random(6)) . '-' . time(),
+                'order_number' => $orderNumber,
                 'customer_name' => $data['customer_name'],
                 'total' => $data['total_amount'],
             ]);
