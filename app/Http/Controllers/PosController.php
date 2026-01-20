@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\Order;
+use App\Models\Shift;
 use App\Models\Tenant;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Actions\StoreOrderAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Actions\StoreOrderAction;
-use App\Models\Order;
-use App\Models\Product;
+use Filament\Notifications\Notification;
 
 class PosController extends Controller
 {
@@ -57,6 +59,17 @@ class PosController extends Controller
         return view('client.pos.print-struk', compact('order', 'tenant'));
 
     }
+    public function mount()
+{
+    $hasShift = Shift::where('user_id', Auth::id())
+        ->where('status', 'open')
+        ->exists();
+
+    if (! $hasShift) {
+        Notification::make()->title('Harap Buka Shift Terlebih Dahulu')->warning()->send();
+        return redirect()->to('/owner/cashier-shift');
+    }
+}
 
 
     public function store(Request $request, StoreOrderAction $storeOrder)

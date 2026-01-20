@@ -3,10 +3,12 @@
 namespace App\Actions;
 
 use App\Models\Order;
-use App\Models\OrderItem;
+use App\Models\Shift;
 use App\Models\Payment;
-use Illuminate\Support\Facades\DB;
+use App\Models\OrderItem;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class StoreOrderAction
 {
@@ -19,12 +21,17 @@ class StoreOrderAction
              $orderNumber = "POS-{$tenantId}-" . date('ymd') . "-{$random}";
         } while (Order::where('tenant_id', $tenantId)->where('order_number', $orderNumber)->exists());
 
+
+        $activeShift = Shift::where('user_id', Auth::user()->id())
+        ->where('status', 'open')
+        ->first();
             $order = Order::create([
                 'tenant_id' => $tenantId,
                 'status' => $data['status'] ?? 'paid',
                 'order_number' => $orderNumber,
                 'customer_name' => $data['customer_name'],
                 'total' => $data['total_amount'],
+                'shift_id' => $activeShift->id
             ]);
 
             foreach ($data['cart'] as $item) {

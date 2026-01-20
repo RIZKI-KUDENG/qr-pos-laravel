@@ -56,7 +56,7 @@ class OrdersTable
             ->headerActions([
                 // Ganti dengan kode Native Export ini:
                 ExportAction::make() 
-                    ->exporter(OrderExporter::class) // Panggil class yang kita buat di langkah 2
+                    ->exporter(OrderExporter::class) 
                     ->label('Export Excel')
                     ->color('success')
                     ->formats([
