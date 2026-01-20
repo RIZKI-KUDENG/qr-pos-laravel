@@ -9,14 +9,20 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 
 class MenuController extends Controller{
 
 
-    public function index(Tenant $tenant, Request $request){
-         $categoryFilter = $request->get('category', 'all');
-        $search = $request->get('search', '');
-        $categories = $tenant->categories()
+public function index(Tenant $tenant, Request $request)
+{
+    $categoryFilter = $request->get('category', 'all');
+    $search = $request->get('search', '');
+
+    $cacheKey = "menu:tenant:{$tenant->id}:category:{$categoryFilter}:search:" . md5($search);
+
+    $categories = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($tenant, $categoryFilter, $search) {
+        return $tenant->categories()
             ->when($categoryFilter !== 'all', function ($q) use ($categoryFilter) {
                 $q->where('id', $categoryFilter);
             })
@@ -27,20 +33,28 @@ class MenuController extends Controller{
                     });
             }])
             ->get();
-        return view('client.menu.index', compact('tenant', 'categories', 'categoryFilter', 'search'));
-    }
-    public function table(Tenant $tenant, QrTable $qrTable)
-    {
-        if ($qrTable->tenant_id !== $tenant->id) {
-            abort(404);
-        }
+    });
 
-        $categories = $tenant->categories()
-            ->with(['products' => fn($q) => $q->where('is_active', true)])
+    return view('client.menu.index', compact('tenant', 'categories', 'categoryFilter', 'search'));
+}
+
+   public function table(Tenant $tenant, QrTable $qrTable)
+{
+    if ($qrTable->tenant_id !== $tenant->id) {
+        abort(404);
+    }
+
+    $cacheKey = "menu:tenant:{$tenant->id}:table";
+
+    $categories = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($tenant) {
+        return $tenant->categories()
+            ->with(['products' => fn ($q) => $q->where('is_active', true)])
             ->get();
+    });
 
-        return view('client.menu.index', compact('tenant', 'categories', 'qrTable'));
-    }
+    return view('client.menu.index', compact('tenant', 'categories', 'qrTable'));
+}
+
     public function storeOrder(Request $request, Tenant $tenant, QrTable $qrTable)
     {
         $request->validate([
