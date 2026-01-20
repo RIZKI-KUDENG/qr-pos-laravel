@@ -27,6 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/pos/order', [PosController::class, 'store'])->name('pos.store');
     Route::get('/orders/{orderNumber}/print', [PosController::class, 'printStruk'])
     ->name('pos.print');
+    Route::post('/pos/open-shift', [PosController::class, 'openShift'])->name('pos.openShift');
+    Route::post('/pos/close-shift', [PosController::class, 'closeShift'])->name('pos.closeShift');
 
     //Livewire Routes
     Route::get('/products', ProductManager::class)->name('products.index');

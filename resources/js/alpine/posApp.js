@@ -5,6 +5,7 @@ export default function posApp() {
         changeAmount: 0,
         customerName: "Pelanggan Umum",
         loading: false,
+        showCloseShift: false,
         search: "",
         activeCategory: "all",
 

@@ -22,7 +22,7 @@ class StoreOrderAction
         } while (Order::where('tenant_id', $tenantId)->where('order_number', $orderNumber)->exists());
 
 
-        $activeShift = Shift::where('user_id', Auth::user()->id())
+        $activeShift = Shift::where('user_id', Auth::id())
         ->where('status', 'open')
         ->first();
             $order = Order::create([

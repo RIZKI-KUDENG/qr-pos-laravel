@@ -24,6 +24,7 @@ class PosController extends Controller
             abort(403, 'You are not authorized to access this page.');
         }
         $tenant = $user->tenant ?? Tenant::find($user->tenant_id);
+        $hasShift = Shift::where('user_id', Auth::id())->where('status', 'open')->exists();
 
         $categoryFilter = $request->get('category', 'all');
         $search = $request->get('search', '');
@@ -42,7 +43,7 @@ class PosController extends Controller
 
         return view(
             'client.pos.index',
-            compact('tenant', 'categories', 'categoryFilter', 'search')
+            compact('tenant', 'categories', 'categoryFilter', 'search', 'hasShift')
         );
     }
     public function printStruk($orderNumber){
@@ -59,6 +60,61 @@ class PosController extends Controller
         return view('client.pos.print-struk', compact('order', 'tenant'));
 
     }
+    
+    public function openShift(Request $request)
+    {
+        $request->validate([
+            'start_cash' => 'required|numeric|min:0',
+        ]);
+
+        Shift::create([
+            'tenant_id' => Auth::user()->tenant_id,
+            'user_id' => Auth::id(),
+            'start_time' => now(),
+            'start_cash' => $request->start_cash,
+            'status' => 'open',
+        ]);
+        return redirect()->route('pos.index')->with('success', 'Shift berhasil dibuka!');
+    }
+    public function closeShift(Request $request)
+{
+    $request->validate([
+        'actual_cash' => 'required|numeric|min:0',
+        'notes' => 'nullable|string'
+    ]);
+
+    $user = Auth::user();
+    
+    $currentShift = Shift::where('user_id', $user->id)
+        ->where('status', 'open')
+        ->firstOrFail();
+
+    $cashSales = Order::where('shift_id', $currentShift->id)
+        ->whereHas('payment', function ($query) {
+            $query->where('method', 'cash'); 
+        })
+        ->sum('total');
+
+    $startCash = $currentShift->start_cash;
+    $expectedCash = $startCash + $cashSales; 
+    $actualCash = $request->actual_cash;     
+    $difference = $actualCash - $expectedCash; 
+
+    $currentShift->update([
+        'end_time' => now(),
+        'total_cash_sales' => $cashSales,
+        'expected_cash' => $expectedCash,
+        'actual_cash' => $actualCash,
+        'difference' => $difference,
+        'status' => 'closed',
+        'notes' => $request->notes,
+    ]);
+    Auth::guard('web')->logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/login')->with('status', 'Shift berhasil ditutup. Laporan terkirim ke Owner.');
+}
     public function mount()
 {
     $hasShift = Shift::where('user_id', Auth::id())

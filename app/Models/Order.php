@@ -33,5 +33,6 @@ class Order extends Model
         'status',
         'total',
         'order_number',
+        'shift_id'
     ];
 }
